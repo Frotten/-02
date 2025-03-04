@@ -1,0 +1,37 @@
+#include "标头.h"
+
+int minl(int a, int b, int c) {
+    return a < b ? (a < c ? a : c) : (b < c ? b : c);
+}
+
+int levenshtein_distance(const char* s1, const char* s2) {
+    int len1 = strlen(s1), len2 = strlen(s2);
+    int* dp = malloc((len1 + 1) * sizeof(int));
+
+    for (int i = 0; i <= len1; i++) dp[i] = i;
+
+    for (int j = 1; j <= len2; j++) {
+        int prev = dp[0];
+        dp[0] = j;
+        for (int i = 1; i <= len1; i++) {
+            int temp = dp[i];
+            dp[i] = minl(dp[i] + 1,        // 删除
+                dp[i - 1] + 1,    // 插入
+                prev + (tolower(s1[i - 1]) != tolower(s2[j - 1]))); // 替换
+            prev = temp;
+        }
+    }
+    int result = dp[len1];
+    free(dp);
+    return result;
+}
+
+// 使用示例：允许最多2个错误
+int fuzzy_search_levenshtein(const char* str, const char* pattern, int max_errors) {
+    return levenshtein_distance(str, pattern) <= max_errors;
+}
+
+int main() {
+    printf("%d\n", fuzzy_search_levenshtein("kitten", "sitting", 3)); // 输出 1 (距离=3)
+    return 0;
+}
